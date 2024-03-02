@@ -25,16 +25,22 @@ class FullDataCoroutineConfig {
         @Autowired
         inspectorRepo: InspectorRepository,
         @Autowired
-        variousNotesRepo: VariousNotesRepository
+        variousNotesRepo: VariousNotesRepository,
+        @Autowired
+        reportRepo: InspectionReportRepository,
+        @Autowired
+        dailyRepo: DailyAllReportRepository,
     ) = ApplicationRunner {
         log.debug("In appRunner")
 
         runBlocking {
             truckRepo.deleteAll()
             inspectorRepo.deleteAll()
+            reportRepo.deleteAll()
+            dailyRepo.deleteAll()
         }
 
-        val no = 5
+        val no = 6
         runBlocking {
             for (n in 1..no) {
                 var truck1 = Truck(null, 10100 + n, "georgia " + n, "bob ".plus(Random.nextInt(until = 101)))
@@ -45,8 +51,10 @@ class FullDataCoroutineConfig {
         val inspect2 = Inspector(null, 10102, "spector ".plus(doNameNo()), InspectorDivision.CRIME)
         val inspect3 = Inspector(null, 10103, "spector ".plus(doNameNo()), InspectorDivision.GOODS)
         val inspect4 = Inspector(null, 10104, "spector ".plus(doNameNo()), InspectorDivision.BEGINNER)
+        val inspect5 = Inspector(null, 10105, "corn  ".plus(doNameNo()), InspectorDivision.AGRICULTURE)
+        val inspect6 = Inspector(null, 10106, "apples ".plus(doNameNo()), InspectorDivision.AGRICULTURE)
 
-        val mylist = mutableListOf(inspect1, inspect2, inspect3, inspect4)
+        val mylist = mutableListOf(inspect1, inspect2, inspect3, inspect4, inspect5, inspect6)
         runBlocking {
             for (spect in mylist) {
                 inspectorRepo.save(spect)

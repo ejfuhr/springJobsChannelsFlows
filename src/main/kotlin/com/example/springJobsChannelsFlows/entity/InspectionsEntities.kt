@@ -1,6 +1,7 @@
 package com.example.springJobsChannelsFlows.entity
 
 
+import kotlinx.coroutines.flow.Flow
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.repository.kotlin.CoroutineCrudRepository
@@ -9,22 +10,25 @@ import org.springframework.stereotype.Repository
 import java.time.LocalDate
 
 @Document
-data class Inspection(
+data class DailyInspection(
     @Id
     var id:String? = null,
-    val inspectionDays:MutableList<InspectionDay>? = mutableListOf(),
+    var specId:Int? = 10101,
+    val inspectionReports: MutableList<InspectionReport> = mutableListOf(),
+    val currentDate:LocalDate? = LocalDate.of(2001,12,1)
 
-)
+    )
 
 @Document
-data class InspectionDay(
+data class InspectionReport(
     @Id
     var id:String? = null,
     var specId:Int? = 10101,
     val currentDate:LocalDate? = LocalDate.of(2001,12,1),
     val trucksInLine: MutableList<Truck> = mutableListOf<Truck>(),
     val inspectors:MutableList<Inspector> = mutableListOf<Inspector>(),
-    val trucksOutOfLine:MutableList<Truck> = mutableListOf<Truck>()
+    val trucksOutOfLine:MutableList<Truck> = mutableListOf<Truck>(),
+    var notes: MutableList<String> = mutableListOf<String>()
 ){
     fun addTruckToLine(truck: Truck):Truck{
         try{
@@ -77,4 +81,17 @@ interface TruckRepository : CoroutineCrudRepository<Truck, String> {
 @Repository
 interface InspectorRepository : CoroutineCrudRepository<Inspector, String> {
     suspend fun findBySpecId(specId: Int): Inspector
+}
+
+@Repository
+interface InspectionReportRepository: CoroutineCrudRepository<InspectionReport, String>{
+    suspend fun findBySpecId(specId: Int): InspectionReport
+    suspend fun findByCurrentDate(currentDate:LocalDate): Flow<InspectionReport>
+
+}
+
+@Repository
+interface DailyAllReportRepository: CoroutineCrudRepository<DailyInspection, String>{
+    suspend fun findBySpecId(specId: Int): DailyInspection
+    suspend fun findByCurrentDate(currentDate:LocalDate): Flow<DailyInspection>
 }

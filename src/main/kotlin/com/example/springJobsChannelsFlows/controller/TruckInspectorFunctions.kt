@@ -62,7 +62,7 @@ fun CoroutineScope.inspectOutput(report: InspectionReport)
         println("    Output received $x")
         delay(sleep)
 
-        report.notes.add("here is full channel.receive() " + channel.receive())
+        report.notes.add("here is complete channel.receive() " + channel.receive())
     }
     println("    Output exiting")
     report.notes.add("    Output exiting")

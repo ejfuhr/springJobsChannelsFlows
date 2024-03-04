@@ -1,22 +1,26 @@
-package com.example.springJobsChannelsFlows.controller
+package com.example.springJobsChannelsFlows.entity
 
-import com.example.springJobsChannelsFlows.entity.InspectionReport
-import com.example.springJobsChannelsFlows.entity.Truck
-import com.example.springJobsChannelsFlows.entity.VariousNotes
+import com.example.springJobsChannelsFlows.controller.TruckInspectorController
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.withContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 private val log: Logger = LoggerFactory.getLogger(TruckInspectorController::class.java)
-private val queueSize = 2
-private val sleep: Long = (400..800).random().toLong()
+val queueSize = 2
+val sleep: Long = (400..800).random().toLong()
+
+/*
+ * the following three functions 1) queueTrucks, 2) filterTrucksReport then 3) SendChannel inspectOutput
+ * they should 1) queueTrucks returning ReceiveChannel<Truck>
+ * then 2) checkTires returning ReceiveChannel<Truck>
+ * then 3) inspectAgricultureCriminalBehavior returning ReceiveChannel<Truck>
+ * then 4) do something similar to inspectOutput but return a combined Truck Inspector with clean/failed inspection
+ */
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 fun CoroutineScope.queueTrucks(truckList: MutableList<Truck>, report: InspectionReport)
         : ReceiveChannel<Truck> = produce(capacity = queueSize) {
@@ -44,7 +48,7 @@ fun CoroutineScope.filterTrucksReport(trucks: ReceiveChannel<Truck>, report: Ins
         println("  Filter received $x")
         delay(sleep)
         val y = "'$x'"
-        report.notes.add(y)
+        //report.notes.add(y)
         report.notes.add("  Filter sent $y")
         channel.send(report)
         println("  Filter sent $y")
@@ -60,9 +64,10 @@ fun CoroutineScope.inspectOutput(report: InspectionReport)
     for (x in channel) {
         report.notes.add("    Output received $x")
         println("    Output received $x")
+
         delay(sleep)
 
-        report.notes.add("here is complete channel.receive() " + channel.receive())
+        //report.notes.add("here is complete channel.receive() " + channel.receive())
     }
     println("    Output exiting")
     report.notes.add("    Output exiting")

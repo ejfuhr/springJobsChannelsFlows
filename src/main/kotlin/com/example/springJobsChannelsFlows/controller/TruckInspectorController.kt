@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
-import kotlin.time.Duration.Companion.seconds
 
 
 /**
@@ -57,8 +56,6 @@ class TruckInspectorController(
             reportRepo.delete(reportRepo.findBySpecId(reportSpecId))
         }
         //create report new
-
-        //val report: VariousNotes = VariousNotes(null, reportSpecId, mutableListOf())
         val truckList: MutableList<Truck> = mutableListOf()
         val inspectorList : MutableList<Inspector> = mutableListOf()
         for (specId in specIdsList) {

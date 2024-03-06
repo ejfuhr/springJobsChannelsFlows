@@ -7,7 +7,10 @@
 * On the Kotlin and technical side of things, we have a Flow of Trucks passing through several Channels of Inspection points. This process takes time. So a Truck passes from A to B to C to D over time. Maybe we should sequentially Post our findings (from A to D) and Get a final report.
 * Or maybe we do a list of "asynch{}"-ed processes, givings ourselves a list of Deferred Reports that we can merge as our Inspectors complete their InspectionReport.
 * ### Notes
-* This is incomplete process currently, but will be completed as time goes on. Their are plenty of tests that are jump points which I used.
+* in [FullDataCoroutineConfig](src/main/kotlin/com/example/springJobsChannelsFlows/service/InspectorService.kt) the mongodb collection data is cleared and then filled with minimal data to for the tests and controllers to run.
+* [ToyController](src/main/kotlin/com/example/springJobsChannelsFlows/controller/ToyController.kt) illustrates a minimal CoroutineScope with its launch.
+* [TruckInspectorController](src/main/kotlin/com/example/springJobsChannelsFlows/controller/TruckInspectorController.kt) illustrates a more complicated set of coroutines passing the values of one channel to several others
+* I'll be adding more as time goes on.
 ### Reference Documentation
 For further reference, please consider the following sections:
 

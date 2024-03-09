@@ -3,6 +3,8 @@ package com.example.springJobsChannelsFlows.entity
 import com.example.springJobsChannelsFlows.controller.TruckInspectorController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.channels.actor
 import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.delay
 import org.slf4j.Logger
@@ -43,20 +45,34 @@ fun CoroutineScope.queueTrucksInspectors(
  */
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 fun CoroutineScope.checkTires(
-    trucks: ReceiveChannel<Truck>,
-    inspectors: MutableList<Inspector>,
+    truckdao: ReceiveChannel<TruckInspectorList>,
     report: InspectionReport
 )
-        : ReceiveChannel<Truck> = produce(capacity = queueSize) {
+        : ReceiveChannel<TruckInspectorList> = produce(capacity = queueSize) {
     println("  checkTires starting")
-    for (truck in trucks) {
-        println("  checkTires received $truck")
+    for (item in truckdao) {
+        println("  checkTires received $item")
         delay(sleep)
-        report.notes.add("  checkTires sent $truck")
-        channel.send(truck)
-        println("  checkTires sent $truck")
+        report.inspectors += item.inspectorsList
+        report.trucksInLine += item.truckList
+        report.notes.add("  checkTires sent $item")
+        channel.send(item)
+        println("  checkTires sent $item")
     }
     channel.close() //why close??
     println("  checkTires exiting")
     report.notes.add("  checkTires exiting")
+}
+
+@OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+fun CoroutineScope.inspectFinish(report: InspectionReport)
+        : SendChannel<InspectionReport> = actor(capacity = 2) {
+    println("    inspectFinish starting")
+    for (x in channel) {
+        report.notes.add("    inspectFinish received $x")
+        println("    inspectFinish received $x")
+        delay(sleep)
+    }
+    println("    inspectFinish exiting")
+    report.notes.add("    inspectFinish exiting")
 }

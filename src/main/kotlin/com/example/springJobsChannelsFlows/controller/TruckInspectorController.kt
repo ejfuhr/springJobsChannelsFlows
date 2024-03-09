@@ -23,17 +23,17 @@ import java.time.LocalDate
 @RestController
 @RequestMapping("/inspect")
 class TruckInspectorController(
-    @Autowired
+    //.@Autowired
     val variousNotesRepo: VariousNotesRepository,
-    @Autowired
+    //@Autowired
     val truckRepo: TruckRepository,
-    @Autowired
+    //@Autowired
     val inspectorRepo: InspectorRepository,
-    @Autowired
+    //@Autowired
     val reportRepo: InspectionReportRepository,
-    @Autowired
+    //@Autowired
     val spectionRepo: DailyAllReportRepository,
-    @Autowired
+    //@Autowired
     private val inspectorService:InspectorService
 ) {
 
@@ -44,6 +44,43 @@ class TruckInspectorController(
     fun getAllInspectionReports(): Flow<DailyInspection> {
         return spectionRepo.findAll()
     }
+
+    /**
+     * an output or SendChannel is needed withing this method's coroutineScope {}
+     */
+    @GetMapping(path = ["/trucks/queue/report-id/{reportSpecId}/truck-ids/{specIdsList}/spector-ids/{inspectorIdsList}"],
+        produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun trucksInspectLists(@PathVariable reportSpecId: Int,
+                           @PathVariable specIdsList: List<Int>,
+                           @PathVariable inspectorIdsList:List<Int>
+    ):InspectionReport = runBlocking<InspectionReport> {
+
+        reportRepo.findBySpecId(reportSpecId)
+            ?.let { reportRepo.delete(it) }
+        val truckList: MutableList<Truck> = mutableListOf()
+        val inspectorList : MutableList<Inspector> = mutableListOf()
+        for (specId in specIdsList) {
+            log.info("found specId $specId")
+            truckList.add(truckRepo.findBySpecId(specId))
+        }
+        for(inspectId in inspectorIdsList){
+            log.info("found inspectId $inspectId")
+            inspectorList.add(inspectorRepo.findBySpecId(inspectId))
+        }
+        val report = InspectionReport(null,
+            specId = reportSpecId,
+            currentDate = LocalDate.now(),
+            trucksInLine = truckList,
+            inspectors = inspectorList
+        )
+
+        coroutineScope {
+            val source = queueTrucksInspectors(inspectorList, truckList, report)
+            val tires = checkTires(source, report)
+        }
+        return@runBlocking reportRepo.save(report)
+    }
+
     @GetMapping(path = ["/trucks/output/report-id/{reportSpecId}/truck-ids/{specIdsList}/spector-ids/{inspectorIdsList}"],
         produces = [MediaType.APPLICATION_JSON_VALUE])
     fun trucksOutputFromIds(
@@ -52,9 +89,8 @@ class TruckInspectorController(
         @PathVariable inspectorIdsList:List<Int>
     ): InspectionReport = runBlocking<InspectionReport> {
         // if reort is NOT null, delete it
-        if(reportRepo.findBySpecId(reportSpecId) != null){
-            reportRepo.delete(reportRepo.findBySpecId(reportSpecId))
-        }
+        reportRepo.findBySpecId(reportSpecId)
+            ?.let { reportRepo.delete(it) }
         //create report new
         val truckList: MutableList<Truck> = mutableListOf()
         val inspectorList : MutableList<Inspector> = mutableListOf()
@@ -101,9 +137,9 @@ class TruckInspectorController(
                 here is copy/variation of runAll()
 
          */
-        if (variousNotesRepo.findBySpecId(specId) != null) {
-            variousNotesRepo.delete(variousNotesRepo.findBySpecId(specId))
-        }
+
+        variousNotesRepo.findBySpecId(specId)
+            ?.let { variousNotesRepo.delete(it) }
         val notes: VariousNotes = VariousNotes(null, specId, mutableListOf())
         val truck1 = truckRepo.findBySpecId(10101)
         val truck2 = truckRepo.findBySpecId(10102)

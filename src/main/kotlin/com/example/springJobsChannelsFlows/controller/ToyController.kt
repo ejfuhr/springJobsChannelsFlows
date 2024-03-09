@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/toycode")
 class ToyController (
-    @Autowired
+    //@Autowired
     val variousNotesRepo: VariousNotesRepository
 ){
 
